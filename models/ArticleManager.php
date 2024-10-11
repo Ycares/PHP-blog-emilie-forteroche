@@ -3,7 +3,7 @@
 /**
  * Classe qui gère les articles.
  */
-class ArticleManager extends AbstractEntityManager 
+class ArticleManager extends AbstractEntityManager
 {
     /**
      * Récupère tous les articles.
@@ -20,7 +20,7 @@ class ArticleManager extends AbstractEntityManager
         }
         return $articles;
     }
-    
+
     /**
      * Récupère un article par son id.
      * @param int $id : l'id de l'article.
@@ -43,7 +43,7 @@ class ArticleManager extends AbstractEntityManager
      * @param Article $article : l'article à ajouter ou modifier.
      * @return void
      */
-    public function addOrUpdateArticle(Article $article) : void 
+    public function addOrUpdateArticle(Article $article) : void
     {
         if ($article->getId() == -1) {
             $this->addArticle($article);
@@ -92,4 +92,18 @@ class ArticleManager extends AbstractEntityManager
         $sql = "DELETE FROM article WHERE id = :id";
         $this->db->query($sql, ['id' => $id]);
     }
+
+    /**
+     * Supprime un article.
+     * @param int $id : l'id de l'article à supprimer.
+     * @return void
+     */
+    public function deleteComment(array $ids): void
+    {
+        foreach ($ids as $id) {
+          $sql = "DELETE FROM comment WHERE id = :id";
+          $this->db->query($sql, ['id' => $id]);
+      }
+        }
+
 }

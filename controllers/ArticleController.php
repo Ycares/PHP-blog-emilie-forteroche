@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-class ArticleController 
+class ArticleController
 {
     /**
      * Affiche la page d'accueil.
@@ -8,11 +8,13 @@ class ArticleController
      */
     public function showHome() : void
     {
-        $articleManager = new ArticleManager();
-        $articles = $articleManager->getAllArticles();
 
-        $view = new View("Accueil");
-        $view->render("home", ['articles' => $articles]);
+      $articleManager = new ArticleManager();
+      $articles = $articleManager->getAllArticles();
+
+      $view = new View("Accueil");
+      $view->render("home", ['articles' => $articles]);
+
     }
 
     /**
@@ -26,16 +28,19 @@ class ArticleController
 
         $articleManager = new ArticleManager();
         $article = $articleManager->getArticleById($id);
-        
+
         if (!$article) {
             throw new Exception("L'article demandé n'existe pas.");
         }
+
+        $article->incrementViews();
 
         $commentManager = new CommentManager();
         $comments = $commentManager->getAllCommentsByArticleId($id);
 
         $view = new View($article->getTitle());
         $view->render("detailArticle", ['article' => $article, 'comments' => $comments]);
+
     }
 
     /**
@@ -56,4 +61,10 @@ class ArticleController
         $view = new View("A propos");
         $view->render("apropos");
     }
+
+    /**
+     * @return void
+     */
+
+ 
 }

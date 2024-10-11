@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Cette classe sert à gérer les commentaires. 
+ * Cette classe sert à gérer les commentaires.
  */
 class CommentManager extends AbstractEntityManager
 {
@@ -59,10 +59,10 @@ class CommentManager extends AbstractEntityManager
      * @param Comment $comment : l'objet Comment à supprimer.
      * @return bool : true si la suppression a réussi, false sinon.
      */
-    public function deleteComment(Comment $comment) : bool
+    public function deleteComment(int $id) : bool
     {
         $sql = "DELETE FROM comment WHERE id = :id";
-        $result = $this->db->query($sql, ['id' => $comment->getId()]);
+        $result = $this->db->query($sql, ['id' => $id]);
         return $result->rowCount() > 0;
     }
 

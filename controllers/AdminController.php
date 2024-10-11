@@ -1,28 +1,31 @@
-<?php 
+<?php
 /**
  * Contrôleur de la partie admin.
  */
- 
+
 class AdminController {
 
     /**
      * Affiche la page d'administration.
      * @return void
      */
+
     public function showAdmin() : void
     {
-        // On vérifie que l'utilisateur est connecté.
-        $this->checkIfUserIsConnected();
+      $sort = (!empty($_GET['sort'])) ? $_GET['sort'] : 'title' ;
+      $order = (!empty($_GET['order'])) ? $_GET['order'] : 'asc' ;
 
-        // On récupère les articles.
-        $articleManager = new ArticleManager();
-        $articles = $articleManager->getAllArticles();
+      $articleManager = new ArticleManager();
+      $articles = $articleManager->getAllArticles();
 
-        // On affiche la page d'administration.
-        $view = new View("Administration");
-        $view->render("admin", [
-            'articles' => $articles
-        ]);
+      $this->checkIfUserIsConnected();
+      $articles = $this->sortAdminArticles($sort,$order,$articles);
+
+      // On affiche la page d'administration.
+      $view = new View("Administration");
+      $view->render("admin", [
+          'articles' => $articles
+      ]);
     }
 
     /**
@@ -41,7 +44,7 @@ class AdminController {
      * Affichage du formulaire de connexion.
      * @return void
      */
-    public function displayConnectionForm() : void 
+    public function displayConnectionForm() : void
     {
         $view = new View("Connexion");
         $view->render("connectionForm");
@@ -51,7 +54,7 @@ class AdminController {
      * Connexion de l'utilisateur.
      * @return void
      */
-    public function connectUser() : void 
+    public function connectUser() : void
     {
         // On récupère les données du formulaire.
         $login = Utils::request("login");
@@ -87,7 +90,7 @@ class AdminController {
      * Déconnexion de l'utilisateur.
      * @return void
      */
-    public function disconnectUser() : void 
+    public function disconnectUser() : void
     {
         // On déconnecte l'utilisateur.
         unset($_SESSION['user']);
@@ -100,7 +103,7 @@ class AdminController {
      * Affichage du formulaire d'ajout d'un article.
      * @return void
      */
-    public function showUpdateArticleForm() : void 
+    public function showUpdateArticleForm() : void
     {
         $this->checkIfUserIsConnected();
 
@@ -111,24 +114,28 @@ class AdminController {
         $articleManager = new ArticleManager();
         $article = $articleManager->getArticleById($id);
 
-        // Si l'article n'existe pas, on en crée un vide. 
+        // Si l'article n'existe pas, on en crée un vide.
         if (!$article) {
             $article = new Article();
         }
 
+        $commentManager = new CommentManager();
+        $comments = $commentManager->getAllCommentsByArticleId($id);
+
         // On affiche la page de modification de l'article.
         $view = new View("Edition d'un article");
         $view->render("updateArticleForm", [
-            'article' => $article
+            'article' => $article, 'comments' => $comments
         ]);
+
     }
 
     /**
-     * Ajout et modification d'un article. 
+     * Ajout et modification d'un article.
      * On sait si un article est ajouté car l'id vaut -1.
      * @return void
      */
-    public function updateArticle() : void 
+    public function updateArticle() : void
     {
         $this->checkIfUserIsConnected();
 
@@ -172,8 +179,53 @@ class AdminController {
         // On supprime l'article.
         $articleManager = new ArticleManager();
         $articleManager->deleteArticle($id);
-       
+
         // On redirige vers la page d'administration.
         Utils::redirect("admin");
     }
+
+    public function deleteComments()
+    {
+        // Vérifie si des commentaires sont sélectionnés
+        if (!empty($_POST['commentIds'])) {
+            $commentIds = $_POST['commentIds']; // Récupère les IDs des commentaires sélectionnés
+            $commentManager = new CommentManager(); // Instancie le CommentManager
+
+            // Parcours les IDs des commentaires et les supprime un par un
+            foreach ($commentIds as $id) {
+                $commentManager->deleteComment((int)$id);
+            }
+
+          Utils::redirect("admin");
+        } else {
+            // Redirection ou affichage d'un message d'erreur si aucun commentaire n'est sélectionné
+            echo '<p class="error">Veuillez sélectionner au moins un commentaire à supprimer.</p>';
+        }
+    }
+
+    public function sortAdminArticles($sort,$order, $articles) {
+
+      usort($articles, function($a, $b) use ($sort, $order) {
+          switch ($sort) {
+              case 'title':
+                  $result = strcmp($a->getTitle(), $b->getTitle());
+                  break;
+              case 'views':
+                  $result = $a->getVues() - $b->getVues();
+                  break;
+              case 'comments':
+                  $result = $a->getTotalComments() - $b->getTotalComments();
+                  break;
+              case 'date':
+                  $result = strtotime($a->getDateCreation()->format('Y-m-d')) <=> strtotime($b->getDateCreation()->format('Y-m-d'));
+                  break;
+              default:
+                  $result = 0;
+                  break;
+          }
+          return $order === 'asc' ? $result : -$result;
+      });
+
+     return $articles;
+  }
 }
