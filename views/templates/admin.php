@@ -42,7 +42,7 @@
         </thead>
         <tbody>
             <?php foreach ($articles as $article) { ?>
-                <tr>
+                <tr class="oneontwo">
                     <td><?= htmlspecialchars($article->getTitle()) ?></td>
                     <td class="tbody"><?= htmlspecialchars($article->getTotalComments()) ?></td>
                     <td class="tbody"><?= htmlspecialchars($article->getVues()) ?></td>

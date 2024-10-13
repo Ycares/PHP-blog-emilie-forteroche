@@ -11,7 +11,7 @@
     private string $content = "";
     private ?DateTime $dateCreation = null;
     private ?DateTime $dateUpdate = null;
-    private int $vues;
+    private ?int $vues = null;
 
     /**
      * Setter pour l'id de l'utilisateur.
@@ -146,7 +146,6 @@
       return $this->vues;
     }
 
-
     public function incrementViews() : void
     {
         $db = DBManager::getInstance()->getPDO();
@@ -160,10 +159,10 @@
      */
     public function getTotalComments() : int
     {
-        $db = DBManager::getInstance()->getPDO();
-        $sqlCountComments = "SELECT COUNT(*) as totalComment FROM comment WHERE id_article = :id";
-        $params = ['id' => $this->id];
-        $totalComment = DBManager::getInstance()->query($sqlCountComments, $params)->fetch();
-        return (int) $totalComment['totalComment'];
+      $db = DBManager::getInstance()->getPDO();
+      $sqlCountComments = "SELECT COUNT(*) as totalComment FROM comment WHERE id_article = :id";
+      $params = ['id' => $this->id];
+      $totalComment = DBManager::getInstance()->query($sqlCountComments, $params)->fetch();
+      return (int) $totalComment['totalComment'];
     }
  }
